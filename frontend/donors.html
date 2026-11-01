@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Blood Donors | LifeLink – Blood Donor Finder</title>
+  <meta name="description" content="Search verified voluntary blood donors by blood group and city. Fast direct contact for patients and hospitals.">
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <img src="images/logo.svg" alt="LifeLink Blood Donor Finder">
+      </a>
+
+      <nav class="nav-menu" id="navMenu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="donors.html" class="nav-link active">Find Donors</a>
+        <a href="request.html" class="nav-link">Emergency Request</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div id="navAuthActions">
+          <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Join as Donor</a>
+        </div>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation Menu">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="section" style="padding-top: 2.5rem;">
+    <div class="container">
+      
+      <!-- Page Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span class="section-tag">Verified Directory</span>
+          <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--gray-900);">
+            Find Available Blood Donors
+          </h1>
+          <p style="color: var(--gray-600); font-size: 1rem;">
+            Search our active voluntary donor network by required blood group and geographic location.
+          </p>
+        </div>
+        <div>
+          <a href="register.html" class="btn btn-primary">
+            ➕ Register As Donor
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="filter-bar">
+        <div class="filter-inputs">
+          <div style="min-width: 180px;">
+            <label for="filterBloodGroup" class="form-label">Blood Group</label>
+            <select id="filterBloodGroup" class="form-control">
+              <option value="ALL">All Blood Groups</option>
+              <option value="O+">O Positive (O+)</option>
+              <option value="O-">O Negative (O-)</option>
+              <option value="A+">A Positive (A+)</option>
+              <option value="A-">A Negative (A-)</option>
+              <option value="B+">B Positive (B+)</option>
+              <option value="B-">B Negative (B-)</option>
+              <option value="AB+">AB Positive (AB+)</option>
+              <option value="AB-">AB Negative (AB-)</option>
+            </select>
+          </div>
+
+          <div style="flex: 1; min-width: 220px;">
+            <label for="filterCity" class="form-label">City / Location</label>
+            <input type="text" id="filterCity" class="form-control" placeholder="Search city (e.g. Delhi, Mumbai, Pune, Bengaluru)...">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <input type="checkbox" id="filterAvailableOnly" style="width: 18px; height: 18px; accent-color: var(--primary);">
+            <label for="filterAvailableOnly" style="font-size: 0.9rem; font-weight: 600; color: var(--gray-700); cursor: pointer;">
+              Available Donors Only
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <span id="donorCountBadge" style="font-size: 0.85rem; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 0.35rem 0.75rem; border-radius: var(--radius-full);">
+            Searching...
+          </span>
+
+          <div class="filter-view-toggles">
+            <button id="viewCardsBtn" class="view-btn active" title="Grid View">🔲 Grid</button>
+            <button id="viewTableBtn" class="view-btn" title="Table View">☰ Table</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blood Compatibility Info Box -->
+      <div id="compatibilityNotice" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.9rem; color: #1e40af;">
+      </div>
+
+      <!-- Donors Container (Grid or Table) -->
+      <div id="donorsContainer" class="donors-grid">
+        <!-- Rendered dynamically by app.js from C++ backend -->
+      </div>
+
+      <!-- Emergency Help Box if no donor nearby -->
+      <div style="margin-top: 3.5rem; background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%); border: 1.5px dashed var(--primary); border-radius: var(--radius-lg); padding: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.25rem;">
+            Can't find a matching donor nearby?
+          </h3>
+          <p style="color: var(--gray-600); font-size: 0.95rem;">
+            Submit an Emergency Blood Request to broadcast your patient's urgent requirement across the entire community network.
+          </p>
+        </div>
+        <a href="request.html" class="btn btn-emergency btn-lg">
+          🚨 Submit Emergency Request
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="images/logo.svg" alt="LifeLink" style="height: 48px; filter: brightness(0) invert(1);">
+          <p>
+            LifeLink is a high-performance C++ powered voluntary blood donor network designed to save lives through instant connectivity and transparency.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="donors.html">Find Donors</a></li>
+            <li><a href="request.html">Emergency Request</a></li>
+            <li><a href="dashboard.html">System Dashboard</a></li>
+            <li><a href="register.html">Donor Registration</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Blood Groups</h4>
+          <ul class="footer-links">
+            <li><a href="donors.html?bg=O%2B">O Positive (O+)</a></li>
+            <li><a href="donors.html?bg=O-">O Negative (O-)</a></li>
+            <li><a href="donors.html?bg=A%2B">A Positive (A+)</a></li>
+            <li><a href="donors.html?bg=B%2B">B Positive (B+)</a></li>
+            <li><a href="donors.html?bg=AB%2B">AB Positive (AB+)</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">24/7 Emergency Support</h4>
+          <div class="emergency-helpline-box">
+            <div class="hotline-title">National Blood Helpline</div>
+            <div class="hotline-number">104 / 1075</div>
+            <p style="font-size: 0.8rem; color: #cbd5e1; margin-top: 0.5rem;">
+              Toll-free emergency helpline for urgent blood and hospital needs.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 LifeLink – Blood Donor Finder. All rights reserved.
+        </div>
+        <div class="footer-badge">
+          ⚡ Powered by C++17, Crow Web Framework & SQLite3 (B.Tech Internship Project)
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

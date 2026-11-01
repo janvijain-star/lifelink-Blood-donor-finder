@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LifeLink – Blood Donor Finder | Save Lives Instantly</title>
+  <meta name="description" content="LifeLink connects voluntary blood donors with patients and hospitals in critical emergencies. Search verified donors by blood group and city.">
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <img src="images/logo.svg" alt="LifeLink Blood Donor Finder">
+      </a>
+
+      <nav class="nav-menu" id="navMenu">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="donors.html" class="nav-link">Find Donors</a>
+        <a href="request.html" class="nav-link">Emergency Request</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div id="navAuthActions">
+          <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Join as Donor</a>
+        </div>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation Menu">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span>🩸</span> Fast, Verified & Voluntary Blood Network
+        </div>
+        <h1 class="hero-title">
+          Every Drop Saves A Life.<br>
+          Find Blood Donors <span class="highlight">In Real Time.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Connect directly with verified voluntary blood donors near you in seconds. No middlemen, no paid charges — pure life-saving community support.
+        </p>
+
+        <!-- Quick Search Bar inside Hero -->
+        <div class="hero-search-card">
+          <form id="heroSearchForm" class="search-form-row">
+            <div class="form-group">
+              <label for="heroBloodGroup" class="form-label">Blood Group Needed</label>
+              <select id="heroBloodGroup" class="form-control" required>
+                <option value="ALL">Any Blood Group</option>
+                <option value="O+">O Positive (O+)</option>
+                <option value="O-">O Negative (O-)</option>
+                <option value="A+">A Positive (A+)</option>
+                <option value="A-">A Negative (A-)</option>
+                <option value="B+">B Positive (B+)</option>
+                <option value="B-">B Negative (B-)</option>
+                <option value="AB+">AB Positive (AB+)</option>
+                <option value="AB-">AB Negative (AB-)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="heroCity" class="form-label">Enter City / Hospital Area</label>
+              <input type="text" id="heroCity" class="form-control" placeholder="e.g. Delhi, Mumbai, Bengaluru, Pune">
+            </div>
+
+            <div class="form-group" style="align-self: flex-end;">
+              <button type="submit" class="btn btn-primary btn-block" style="height: 48px;">
+                🔍 Find Donors
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Hero Stats Counter -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-value" id="statTotalDonors">10+</div>
+            <div class="stat-label">Active Donors</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="statFulfilled">12+</div>
+            <div class="stat-label">Lives Saved</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="statActiveRequests">4+</div>
+            <div class="stat-label">Active Requests</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="statUnitsNeeded">8+</div>
+            <div class="stat-label">Units Needed</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Urgent Emergency Requests Section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">High Priority</span>
+        <h2 class="section-title">Critical & Urgent Blood Requests</h2>
+        <p class="section-desc">Patients and hospitals who urgently need blood units right now. Your immediate call or response can save a precious life today.</p>
+      </div>
+
+      <div class="requests-grid" id="homeUrgentList">
+        <!-- Injected via JavaScript from C++ Crow REST API -->
+      </div>
+
+      <div style="text-align: center; margin-top: 2.5rem;">
+        <a href="request.html" class="btn btn-emergency btn-lg">
+          🚨 Broadcast An Emergency Request
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Simple 3-Step Process</span>
+        <h2 class="section-title">How LifeLink Saves Lives</h2>
+        <p class="section-desc">A seamless bridge between voluntary donors and critical patients during medical emergencies.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-step-num">01</div>
+          <div class="feature-icon-wrapper">🔍</div>
+          <h3 class="feature-title">Search or Request</h3>
+          <p class="feature-text">
+            Search our verified database by blood group and city or post an emergency request detailing patient hospital info and units needed.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-step-num">02</div>
+          <div class="feature-icon-wrapper">📱</div>
+          <h3 class="feature-title">Instant Connection</h3>
+          <p class="feature-text">
+            Get instant access to available donors' direct contact numbers without tedious registration barriers or middleman charges.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-step-num">03</div>
+          <div class="feature-icon-wrapper">❤️</div>
+          <h3 class="feature-title">Save a Life</h3>
+          <p class="feature-text">
+            The donor arrives at the hospital blood bank to donate. Request status updates in real time on our public dashboard.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blood Compatibility Matrix -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Medical Reference Guide</span>
+        <h2 class="section-title">Blood Group Compatibility Matrix</h2>
+        <p class="section-desc">Understand which blood groups can donate to whom during emergencies.</p>
+      </div>
+
+      <div class="matrix-container">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Blood Type</th>
+              <th>Can Donate Blood To</th>
+              <th>Can Receive Blood From</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="matrix-badge blood-tag">O-</span></td>
+              <td><span class="matrix-badge can-donate">Universal Donor (All Groups)</span></td>
+              <td>O- only</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">O+</span></td>
+              <td>O+, A+, B+, AB+</td>
+              <td>O+, O-</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">A-</span></td>
+              <td>A-, A+, AB-, AB+</td>
+              <td>A-, O-</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">A+</span></td>
+              <td>A+, AB+</td>
+              <td>A+, A-, O+, O-</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">B-</span></td>
+              <td>B-, B+, AB-, AB+</td>
+              <td>B-, O-</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">B+</span></td>
+              <td>B+, AB+</td>
+              <td>B+, B-, O+, O-</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">AB-</span></td>
+              <td>AB-, AB+</td>
+              <td>AB-, A-, B-, O-</td>
+            </tr>
+            <tr>
+              <td><span class="matrix-badge blood-tag">AB+</span></td>
+              <td>AB+ only</td>
+              <td><span class="matrix-badge can-donate">Universal Recipient (All Groups)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call To Action -->
+  <section class="section section-light" style="border-top: 1px solid var(--gray-200);">
+    <div class="container" style="text-align: center; max-width: 750px;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🩸</div>
+      <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--gray-900); margin-bottom: 1rem;">
+        Be The Hero In Someone's Story
+      </h2>
+      <p style="color: var(--gray-600); font-size: 1.1rem; margin-bottom: 2rem;">
+        Healthy individuals between 18 and 65 years can donate blood every 3 months. Register your profile as a voluntary donor today.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="register.html" class="btn btn-primary btn-lg">Register As A Blood Donor</a>
+        <a href="donors.html" class="btn btn-secondary btn-lg">Browse Donor Directory</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="images/logo.svg" alt="LifeLink" style="height: 48px; filter: brightness(0) invert(1);">
+          <p>
+            LifeLink is a high-performance C++ powered voluntary blood donor network designed to save lives through instant connectivity and transparency.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="donors.html">Find Donors</a></li>
+            <li><a href="request.html">Emergency Request</a></li>
+            <li><a href="dashboard.html">System Dashboard</a></li>
+            <li><a href="register.html">Donor Registration</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Blood Groups</h4>
+          <ul class="footer-links">
+            <li><a href="donors.html?bg=O%2B">O Positive (O+)</a></li>
+            <li><a href="donors.html?bg=O-">O Negative (O-)</a></li>
+            <li><a href="donors.html?bg=A%2B">A Positive (A+)</a></li>
+            <li><a href="donors.html?bg=B%2B">B Positive (B+)</a></li>
+            <li><a href="donors.html?bg=AB%2B">AB Positive (AB+)</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">24/7 Emergency Support</h4>
+          <div class="emergency-helpline-box">
+            <div class="hotline-title">National Blood Helpline</div>
+            <div class="hotline-number">104 / 1075</div>
+            <p style="font-size: 0.8rem; color: #cbd5e1; margin-top: 0.5rem;">
+              Toll-free emergency helpline for urgent blood and hospital needs.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 LifeLink – Blood Donor Finder. All rights reserved.
+        </div>
+        <div class="footer-badge">
+          ⚡ Powered by C++17, Crow Web Framework & SQLite3 (B.Tech Internship Project)
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

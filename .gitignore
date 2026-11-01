@@ -1,0 +1,8 @@
+# Ignore binaries and compiled objects
+*.exe
+*.o
+*.obj
+
+# OS files
+Thumbs.db
+.DS_Store

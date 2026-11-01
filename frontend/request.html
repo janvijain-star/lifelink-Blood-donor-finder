@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Blood Request | LifeLink – Blood Donor Finder</title>
+  <meta name="description" content="Submit an emergency blood request. Fast response from voluntary donors for hospitals and critical patients.">
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <img src="images/logo.svg" alt="LifeLink Blood Donor Finder">
+      </a>
+
+      <nav class="nav-menu" id="navMenu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="donors.html" class="nav-link">Find Donors</a>
+        <a href="request.html" class="nav-link active">Emergency Request</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div id="navAuthActions">
+          <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Join as Donor</a>
+        </div>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation Menu">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="section" style="padding-top: 2.5rem;">
+    <div class="container">
+      
+      <!-- Section Header -->
+      <div class="section-header" style="margin-bottom: 2.5rem;">
+        <span class="section-tag">Rapid Response Network</span>
+        <h1 class="section-title">Broadcast Emergency Blood Request</h1>
+        <p class="section-desc">
+          Fill in the patient's critical requirements below. Your request will immediately appear on the live board and alert nearby donors.
+        </p>
+      </div>
+
+      <!-- Request Form Card -->
+      <div class="form-card" style="margin-top: 0;">
+        <form id="emergencyRequestForm">
+          
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="reqPatientName" class="form-label">Patient Name *</label>
+              <input type="text" id="reqPatientName" class="form-control" placeholder="Full name of patient" required>
+            </div>
+            <div class="form-group">
+              <label for="reqBloodGroup" class="form-label">Required Blood Group *</label>
+              <select id="reqBloodGroup" class="form-control" required>
+                <option value="" disabled selected>Select Blood Group</option>
+                <option value="O+">O Positive (O+)</option>
+                <option value="O-">O Negative (O-)</option>
+                <option value="A+">A Positive (A+)</option>
+                <option value="A-">A Negative (A-)</option>
+                <option value="B+">B Positive (B+)</option>
+                <option value="B-">B Negative (B-)</option>
+                <option value="AB+">AB Positive (AB+)</option>
+                <option value="AB-">AB Negative (AB-)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="reqUnits" class="form-label">Units Needed (Bags) *</label>
+              <input type="number" id="reqUnits" class="form-control" min="1" max="20" value="1" required>
+            </div>
+            <div class="form-group">
+              <label for="reqUrgency" class="form-label">Urgency Level *</label>
+              <select id="reqUrgency" class="form-control" required>
+                <option value="Critical">🚨 Critical (Immediate surgery / ICU)</option>
+                <option value="Urgent" selected>⚡ Urgent (Within 24 hours)</option>
+                <option value="Standard">ℹ️ Standard (Planned transfusion)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="reqHospital" class="form-label">Hospital Name *</label>
+              <input type="text" id="reqHospital" class="form-control" placeholder="e.g. Apollo, AIIMS, Fortis" required>
+            </div>
+            <div class="form-group">
+              <label for="reqCity" class="form-label">City / Location *</label>
+              <input type="text" id="reqCity" class="form-control" placeholder="e.g. Delhi, Mumbai, Pune" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="reqContactName" class="form-label">Attendant / Contact Person *</label>
+              <input type="text" id="reqContactName" class="form-control" placeholder="Name of relative or doctor" required>
+            </div>
+            <div class="form-group">
+              <label for="reqPhone" class="form-label">Emergency Phone Number *</label>
+              <input type="tel" id="reqPhone" class="form-control" placeholder="10-digit mobile number" required>
+            </div>
+          </div>
+
+          <div class="form-row-1">
+            <div class="form-group">
+              <label for="reqNotes" class="form-label">Additional Medical Notes / Ward / Bed Number</label>
+              <textarea id="reqNotes" class="form-control" rows="3" placeholder="e.g. Ward 4B, ICU Bed 12. Platelet donation needed. Doctor in-charge: Dr. Sharma"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-emergency btn-block btn-lg" style="margin-top: 1rem;">
+            🚨 Broadcast Emergency Blood Request
+          </button>
+        </form>
+      </div>
+
+      <!-- Live Emergency Board Section -->
+      <div style="margin-top: 4.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span class="section-tag">Live Database Feed</span>
+            <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--gray-900);">
+              Active & Submitted Blood Requests
+            </h2>
+            <p style="color: var(--gray-600); font-size: 0.95rem;">
+              Real-time emergency board displaying patient requests stored in SQLite via C++ Crow backend.
+            </p>
+          </div>
+
+          <div>
+            <select id="reqFilterStatus" class="form-control" style="min-width: 160px;">
+              <option value="ALL">All Statuses</option>
+              <option value="Pending" selected>Active / Pending</option>
+              <option value="Fulfilled">Fulfilled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="requests-grid" id="submittedRequestsList">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="images/logo.svg" alt="LifeLink" style="height: 48px; filter: brightness(0) invert(1);">
+          <p>
+            LifeLink is a high-performance C++ powered voluntary blood donor network designed to save lives through instant connectivity and transparency.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="donors.html">Find Donors</a></li>
+            <li><a href="request.html">Emergency Request</a></li>
+            <li><a href="dashboard.html">System Dashboard</a></li>
+            <li><a href="register.html">Donor Registration</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Blood Groups</h4>
+          <ul class="footer-links">
+            <li><a href="donors.html?bg=O%2B">O Positive (O+)</a></li>
+            <li><a href="donors.html?bg=O-">O Negative (O-)</a></li>
+            <li><a href="donors.html?bg=A%2B">A Positive (A+)</a></li>
+            <li><a href="donors.html?bg=B%2B">B Positive (B+)</a></li>
+            <li><a href="donors.html?bg=AB%2B">AB Positive (AB+)</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">24/7 Emergency Support</h4>
+          <div class="emergency-helpline-box">
+            <div class="hotline-title">National Blood Helpline</div>
+            <div class="hotline-number">104 / 1075</div>
+            <p style="font-size: 0.8rem; color: #cbd5e1; margin-top: 0.5rem;">
+              Toll-free emergency helpline for urgent blood and hospital needs.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 LifeLink – Blood Donor Finder. All rights reserved.
+        </div>
+        <div class="footer-badge">
+          ⚡ Powered by C++17, Crow Web Framework & SQLite3 (B.Tech Internship Project)
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
