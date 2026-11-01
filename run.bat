@@ -26,6 +26,9 @@ if not exist "backend\lifelink_server.exe" (
     )
 )
 
+rem Ensure no orphan background server processes conflict on port 8080
+taskkill /f /im lifelink_server.exe >nul 2>&1
+
 echo [INFO] Starting LifeLink C++ Server on http://localhost:8080 ...
 echo [INFO] The website will automatically open in your default browser.
 echo [INFO] Press Ctrl+C in this terminal window to stop the server anytime.

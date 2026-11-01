@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <memory>
+#include <mutex>
 #include "sqlite3.h"
 
 namespace lifelink {
@@ -107,6 +108,7 @@ public:
 private:
     sqlite3* db_ = nullptr;
     std::string db_path_;
+    mutable std::recursive_mutex db_mutex_;
 
     bool executeScript(const std::string& sql);
     void seedInitialDataIfEmpty();

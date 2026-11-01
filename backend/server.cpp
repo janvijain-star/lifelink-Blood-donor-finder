@@ -2,6 +2,10 @@
 #include "crow_all.h"
 #include "db_manager.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifdef DELETE
 #undef DELETE
 #endif
@@ -88,6 +92,20 @@ crow::response jsonResponse(int code, const crow::json::wvalue& body) {
 }
 
 int main(int argc, char* argv[]) {
+#ifdef _WIN32
+    // Ensure only one instance of the server runs locally on Windows to prevent port collisions
+    HANDLE hServerMutex = CreateMutexA(NULL, TRUE, "Global\\LifeLink_Crow_Server_Single_Instance");
+    if (hServerMutex != NULL && GetLastError() == ERROR_ALREADY_EXISTS) {
+        std::cerr << "======================================================" << std::endl;
+        std::cerr << "[ERROR] Another instance of lifelink_server is ALREADY running!" << std::endl;
+        std::cerr << "[INFO] Please close the other terminal or run:" << std::endl;
+        std::cerr << "       taskkill /f /im lifelink_server.exe" << std::endl;
+        std::cerr << "======================================================" << std::endl;
+        CloseHandle(hServerMutex);
+        return 1;
+    }
+#endif
+
     int port = 8080;
     const char* envPort = std::getenv("PORT");
     if (envPort) {
@@ -153,6 +171,10 @@ int main(int argc, char* argv[]) {
     });
 
     CROW_ROUTE(app, "/donors.html")([frontendPath]() {
+        return serveFile(frontendPath + "/donors.html");
+    });
+
+    CROW_ROUTE(app, "/find.html")([frontendPath]() {
         return serveFile(frontendPath + "/donors.html");
     });
 

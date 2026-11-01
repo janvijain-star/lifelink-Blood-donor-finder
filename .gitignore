@@ -6,6 +6,11 @@
 # Backup files
 *.bak
 
+# SQLite temporary journal and WAL files
+*.db-shm
+*.db-wal
+*.db-journal
+
 # OS files
 Thumbs.db
 .DS_Store

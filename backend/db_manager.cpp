@@ -12,6 +12,7 @@ DatabaseManager::~DatabaseManager() {
 }
 
 void DatabaseManager::close() {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (db_) {
         sqlite3_close(db_);
         db_ = nullptr;
@@ -19,6 +20,7 @@ void DatabaseManager::close() {
 }
 
 bool DatabaseManager::executeScript(const std::string& sql) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     char* errMsg = nullptr;
     int rc = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &errMsg);
@@ -31,15 +33,20 @@ bool DatabaseManager::executeScript(const std::string& sql) {
 }
 
 bool DatabaseManager::init(const std::string& dbPath) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     db_path_ = dbPath;
     int rc = sqlite3_open(db_path_.c_str(), &db_);
     if (rc != SQLITE_OK) {
-        std::cerr << "[DB ERROR] Cannot open database: " << sqlite3_errmsg(db_) << std::endl;
+        std::cerr << "[DB ERROR] Cannot open database: " << (db_ ? sqlite3_errmsg(db_) : "unknown error") << std::endl;
         return false;
     }
 
-    // Enable foreign keys
+    // Set 5000ms busy timeout to prevent SQLITE_BUSY under concurrent requests
+    sqlite3_busy_timeout(db_, 5000);
+
+    // Enable foreign keys and WAL mode for high concurrency
     executeScript("PRAGMA foreign_keys = ON;");
+    executeScript("PRAGMA journal_mode = WAL;");
 
     // Create tables
     std::string schemaSql = R"(
@@ -99,6 +106,7 @@ bool DatabaseManager::init(const std::string& dbPath) {
 }
 
 void DatabaseManager::seedInitialDataIfEmpty() {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     sqlite3_stmt* stmt = nullptr;
     std::string query = "SELECT COUNT(*) FROM donors;";
     int count = 0;
@@ -145,6 +153,7 @@ void DatabaseManager::seedInitialDataIfEmpty() {
 // --------------------------------------------------------------------------
 
 std::vector<Donor> DatabaseManager::getDonors(const std::string& bloodGroup, const std::string& city, int availableOnly) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     std::vector<Donor> result;
     if (!db_) return result;
 
@@ -200,6 +209,7 @@ std::vector<Donor> DatabaseManager::getDonors(const std::string& bloodGroup, con
 }
 
 std::optional<Donor> DatabaseManager::getDonorById(int id) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return std::nullopt;
     std::string sql = "SELECT id, user_id, name, age, gender, blood_group, phone, email, city, state, address, is_available, last_donation_date, created_at FROM donors WHERE id = ?;";
     
@@ -234,6 +244,7 @@ std::optional<Donor> DatabaseManager::getDonorById(int id) {
 }
 
 bool DatabaseManager::addDonor(const Donor& d, int* outId) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "INSERT INTO donors (user_id, name, age, gender, blood_group, phone, email, city, state, address, is_available, last_donation_date) "
                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
@@ -273,6 +284,7 @@ bool DatabaseManager::addDonor(const Donor& d, int* outId) {
 }
 
 bool DatabaseManager::updateDonor(const Donor& d) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_ || d.id <= 0) return false;
     std::string sql = "UPDATE donors SET name=?, age=?, gender=?, blood_group=?, phone=?, email=?, city=?, state=?, address=?, is_available=?, last_donation_date=? WHERE id=?;";
     sqlite3_stmt* stmt = nullptr;
@@ -299,6 +311,7 @@ bool DatabaseManager::updateDonor(const Donor& d) {
 }
 
 bool DatabaseManager::updateDonorAvailability(int donorId, int isAvailable) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "UPDATE donors SET is_available = ? WHERE id = ?;";
     sqlite3_stmt* stmt = nullptr;
@@ -313,6 +326,7 @@ bool DatabaseManager::updateDonorAvailability(int donorId, int isAvailable) {
 }
 
 bool DatabaseManager::deleteDonor(int donorId) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "DELETE FROM donors WHERE id = ?;";
     sqlite3_stmt* stmt = nullptr;
@@ -330,6 +344,7 @@ bool DatabaseManager::deleteDonor(int donorId) {
 // --------------------------------------------------------------------------
 
 std::vector<BloodRequest> DatabaseManager::getBloodRequests(const std::string& status, const std::string& bloodGroup, const std::string& city) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     std::vector<BloodRequest> result;
     if (!db_) return result;
 
@@ -386,6 +401,7 @@ std::vector<BloodRequest> DatabaseManager::getBloodRequests(const std::string& s
 }
 
 std::optional<BloodRequest> DatabaseManager::getBloodRequestById(int id) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return std::nullopt;
     std::string sql = "SELECT id, patient_name, blood_group, units_needed, hospital_name, city, contact_person, contact_phone, urgency, status, notes, created_at FROM blood_requests WHERE id = ?;";
     
@@ -418,6 +434,7 @@ std::optional<BloodRequest> DatabaseManager::getBloodRequestById(int id) {
 }
 
 bool DatabaseManager::addBloodRequest(const BloodRequest& req, int* outId) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "INSERT INTO blood_requests (patient_name, blood_group, units_needed, hospital_name, city, contact_person, contact_phone, urgency, status, notes) "
                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
@@ -451,6 +468,7 @@ bool DatabaseManager::addBloodRequest(const BloodRequest& req, int* outId) {
 }
 
 bool DatabaseManager::updateBloodRequestStatus(int requestId, const std::string& newStatus) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "UPDATE blood_requests SET status = ? WHERE id = ?;";
     sqlite3_stmt* stmt = nullptr;
@@ -465,6 +483,7 @@ bool DatabaseManager::updateBloodRequestStatus(int requestId, const std::string&
 }
 
 bool DatabaseManager::deleteBloodRequest(int requestId) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "DELETE FROM blood_requests WHERE id = ?;";
     sqlite3_stmt* stmt = nullptr;
@@ -482,6 +501,7 @@ bool DatabaseManager::deleteBloodRequest(int requestId) {
 // --------------------------------------------------------------------------
 
 Statistics DatabaseManager::getStatistics() {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     Statistics stats;
     if (!db_) return stats;
 
@@ -539,6 +559,7 @@ Statistics DatabaseManager::getStatistics() {
 // --------------------------------------------------------------------------
 
 bool DatabaseManager::registerUser(const User& user, int* outId) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return false;
     std::string sql = "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?);";
     sqlite3_stmt* stmt = nullptr;
@@ -565,6 +586,7 @@ bool DatabaseManager::registerUser(const User& user, int* outId) {
 }
 
 std::optional<User> DatabaseManager::authenticateUser(const std::string& email, const std::string& password) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return std::nullopt;
     std::string sql = "SELECT id, name, email, password, phone, role, created_at FROM users WHERE LOWER(email) = LOWER(?) AND password = ?;";
     sqlite3_stmt* stmt = nullptr;
@@ -593,6 +615,7 @@ std::optional<User> DatabaseManager::authenticateUser(const std::string& email, 
 }
 
 std::optional<User> DatabaseManager::getUserById(int id) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return std::nullopt;
     std::string sql = "SELECT id, name, email, password, phone, role, created_at FROM users WHERE id = ?;";
     sqlite3_stmt* stmt = nullptr;
@@ -620,6 +643,7 @@ std::optional<User> DatabaseManager::getUserById(int id) {
 }
 
 std::optional<User> DatabaseManager::getUserByEmail(const std::string& email) {
+    std::lock_guard<std::recursive_mutex> lock(db_mutex_);
     if (!db_) return std::nullopt;
     std::string sql = "SELECT id, name, email, password, phone, role, created_at FROM users WHERE LOWER(email) = LOWER(?);";
     sqlite3_stmt* stmt = nullptr;
