@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Become a Donor – LifeLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-head"><h1>🩸 Become a Donor</h1><p>Your details stay private unless you choose to share them.</p></div>
+  <section style="padding-top:20px">
+    <div class="container">
+      <form class="form-card" id="donorForm" novalidate>
+        <input type="hidden" name="id">
+        <div class="form-grid">
+          <div class="field full"><label>Full Name</label><input name="full_name" data-rule="name" placeholder="e.g. Aarav Sharma"><span class="err"></span></div>
+          <div class="field"><label>Age</label><input name="age" type="number" min="18" max="65" data-rule="age" placeholder="18 – 65"><span class="err"></span></div>
+          <div class="field"><label>Gender</label>
+            <select name="gender" data-rule="required"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select><span class="err"></span></div>
+          <div class="field"><label>Mobile Number</label><input name="mobile" maxlength="10" data-rule="phone" placeholder="10-digit number"><span class="err"></span></div>
+          <div class="field"><label>Email</label><input name="email" type="email" data-rule="email" placeholder="you@example.com"><span class="err"></span></div>
+          <div class="field"><label>Blood Group</label><select name="blood_group" data-blood data-rule="required"><option value="">Select</option></select><span class="err"></span></div>
+          <div class="field"><label>Availability</label>
+            <select name="available"><option value="1">Available to donate</option><option value="0">Not available right now</option></select></div>
+          <div class="field"><label>City</label><input name="city" data-rule="required" placeholder="e.g. Delhi"><span class="err"></span></div>
+          <div class="field"><label>State</label><input name="state" data-rule="required" placeholder="e.g. Delhi"><span class="err"></span></div>
+          <div class="field full"><label class="check"><input type="checkbox" name="consent_share_contact"> I agree that my mobile number and email may be shown to verified people requesting blood. (Otherwise only your name, blood group and city are listed.)</label></div>
+          <div class="field full"><label class="check"><input type="checkbox" id="eligible"> I confirm I am healthy, between 18–65 years, and weigh at least 45 kg.</label><span class="err" id="eligErr"></span></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="submitBtn">Register as Donor</button>
+          <button type="button" class="btn btn-outline" id="manageBtn">Already registered? Edit / Delete</button>
+          <button type="button" class="btn btn-outline" id="deleteBtn" style="display:none">🗑 Delete my record</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <div class="modal" id="lookup"><form class="form-card" id="lookupForm" novalidate>
+    <h3>Manage your donor profile</h3><p class="muted">Enter the mobile number you registered with.</p><br>
+    <div class="field"><input name="mobile" maxlength="10" data-rule="phone" placeholder="10-digit mobile"><span class="err"></span></div>
+    <div class="form-actions"><button class="btn btn-primary">Load profile</button><button type="button" class="btn btn-outline" onclick="lookup.classList.remove('open')">Cancel</button></div>
+  </form></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    const form = document.getElementById("donorForm");
+    const btn = document.getElementById("submitBtn");
+    const lookup = document.getElementById("lookup");
+    let editing = null;
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      let ok = validateForm(form);
+      const elig = document.getElementById("eligible").checked;
+      document.getElementById("eligErr").textContent = elig ? "" : "Please confirm your eligibility.";
+      if (!ok || !elig) return toast("Please fix the highlighted fields.", "error");
+      const data = formData(form); data.available = Number(data.available);
+      btn.disabled = true;
+      try {
+        const res = editing
+          ? await api(`/donors/${editing}`, { method: "PUT", body: JSON.stringify(data) })
+          : await api("/donors", { method: "POST", body: JSON.stringify(data) });
+        toast(res.message, "success");
+        if (!editing) form.reset();
+      } catch (err) { toast(err.message, "error"); }
+      btn.disabled = false;
+    });
+
+    document.getElementById("manageBtn").onclick = () => lookup.classList.add("open");
+    document.getElementById("lookupForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (!validateForm(e.target)) return;
+      try {
+        const d = await api(`/donors/me?mobile=${encodeURIComponent(e.target.mobile.value.trim())}`);
+        for (const [k, v] of Object.entries(d)) {
+          const el = form.elements[k]; if (!el) continue;
+          if (el.type === "checkbox") el.checked = v == 1; else el.value = v;
+        }
+        form.mobile.readOnly = true;
+        editing = d.id; btn.textContent = "Save Changes";
+        document.getElementById("deleteBtn").style.display = "inline-flex";
+        lookup.classList.remove("open"); toast("Profile loaded. Edit and save.", "success");
+      } catch (err) { toast(err.message, "error"); }
+    });
+    document.getElementById("deleteBtn").onclick = async () => {
+      if (!confirm("Permanently delete your donor record?")) return;
+      try {
+        const r = await api(`/donors/${editing}?mobile=${form.mobile.value}`, { method: "DELETE" });
+        toast(r.message, "success"); setTimeout(() => location.reload(), 1200);
+      } catch (err) { toast(err.message, "error"); }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LifeLink – Every Drop Can Save a Life</title>
+  <meta name="description" content="LifeLink connects blood donors with patients who urgently need blood.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <section class="hero">
+    <div class="container">
+      <div>
+        <span class="tag">❤ Every Drop Can Save a Life</span>
+        <h1>Donate Blood, <em>Save Lives</em></h1>
+        <p>LifeLink connects willing blood donors with patients and families in urgent need. Register in two minutes, or find a matching donor near you instantly.</p>
+        <div class="hero-actions">
+          <a href="find.html" class="btn btn-primary">🔍 Find a Donor</a>
+          <a href="register.html" class="btn btn-outline">🩸 Become a Donor</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <!-- Blood drop + heart illustration -->
+        <svg viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4d6d"/><stop offset="1" stop-color="#a4161a"/></linearGradient>
+          </defs>
+          <circle cx="150" cy="200" r="140" fill="#ffccd5" opacity=".55"/>
+          <path d="M150 20 C150 20 50 150 50 225 a100 100 0 0 0 200 0 C250 150 150 20 150 20Z" fill="url(#g)"/>
+          <ellipse cx="105" cy="200" rx="16" ry="32" fill="#fff" opacity=".35"/>
+          <g class="pulse"><path d="M150 285 l-38-36 a24 24 0 0 1 38-30 a24 24 0 0 1 38 30z" fill="#fff"/></g>
+          <polyline points="20,330 90,330 110,300 130,350 150,320 170,330 280,330" fill="none" stroke="#d7263d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="grid grid-4" id="stats">
+        <div class="card stat reveal"><div class="num" data-k="total_donors">0</div><div class="lbl">Registered Donors</div></div>
+        <div class="card stat reveal"><div class="num" data-k="available_donors">0</div><div class="lbl">Available Now</div></div>
+        <div class="card stat reveal"><div class="num" data-k="total_requests">0</div><div class="lbl">Blood Requests</div></div>
+        <div class="card stat reveal"><div class="num" data-k="fulfilled_requests">0</div><div class="lbl">Lives Helped</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:#fff">
+    <div class="container">
+      <div class="section-title reveal"><h2>Why Donate Blood?</h2><p>A single donation can save up to three lives.</p></div>
+      <div class="grid grid-3">
+        <div class="card reveal"><div class="icon">⏱</div><h3>Every 2 Seconds</h3><p class="muted">Someone in India needs blood. Accidents, surgeries, cancer and thalassemia patients depend on donors.</p></div>
+        <div class="card reveal"><div class="icon">✅</div><h3>Who Can Donate?</h3><p class="muted">Healthy people aged 18–65, weighing at least 45 kg, can donate every 3 months (men) or 4 months (women).</p></div>
+        <div class="card reveal"><div class="icon">💪</div><h3>Safe & Simple</h3><p class="muted">Donation takes about 10 minutes, uses sterile single-use kits, and your body replaces the blood within weeks.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-title reveal"><h2>How LifeLink Works</h2></div>
+      <div class="grid grid-3">
+        <div class="card reveal"><div class="icon">📝</div><h3>1. Register</h3><p class="muted">Donors sign up with blood group, city and availability.</p></div>
+        <div class="card reveal"><div class="icon">🔎</div><h3>2. Search</h3><p class="muted">Patients filter donors by blood group and city.</p></div>
+        <div class="card reveal"><div class="icon">📞</div><h3>3. Connect</h3><p class="muted">Contact details are shown only for donors who gave consent.</p></div>
+      </div>
+      <div class="band reveal" style="margin-top:50px">
+        <h2>Need blood urgently?</h2>
+        <p>Post an emergency request so donors and volunteers can respond fast.</p>
+        <a href="request.html" class="btn">🚑 Post Emergency Request</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/app.js"></script>
+  <script>
+    api("/stats").then(s => document.querySelectorAll("[data-k]").forEach(el => animateCount(el, s[el.dataset.k] || 0)))
+      .catch(e => toast(e.message, "error"));
+  </script>
+</body>
+</html>

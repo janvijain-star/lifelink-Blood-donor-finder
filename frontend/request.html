@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emergency Blood Request – LifeLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-head"><h1>🚑 Emergency Blood Request</h1><p>Fill in the details so donors can respond quickly.</p></div>
+  <section style="padding-top:20px">
+    <div class="container">
+      <form class="form-card" id="reqForm" novalidate>
+        <div class="form-grid">
+          <div class="field"><label>Patient Name</label><input name="patient_name" data-rule="name"><span class="err"></span></div>
+          <div class="field"><label>Required Blood Group</label><select name="blood_group" data-blood data-rule="required"><option value="">Select</option></select><span class="err"></span></div>
+          <div class="field full"><label>Hospital Name</label><input name="hospital" data-rule="required" placeholder="e.g. AIIMS"><span class="err"></span></div>
+          <div class="field"><label>City</label><input name="city" data-rule="required"><span class="err"></span></div>
+          <div class="field"><label>Contact Number</label><input name="contact" maxlength="10" data-rule="phone" placeholder="Used to track your request"><span class="err"></span></div>
+          <div class="field"><label>Units Required</label><input name="units" type="number" min="1" max="10" value="1" data-rule="units"><span class="err"></span></div>
+          <div class="field"><label>Emergency Level</label>
+            <select name="emergency_level" data-rule="required"><option value="">Select</option><option>Critical</option><option>High</option><option>Normal</option></select><span class="err"></span></div>
+          <div class="field full"><label>Required Date</label><input name="required_date" type="date" data-rule="future"><span class="err"></span></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" id="btn">Submit Request</button></div>
+        <p class="muted" style="margin-top:14px">Your contact number is masked in public lists. Use it on the Dashboard to track or close your request.</p>
+      </form>
+    </div>
+  </section>
+  <script src="js/app.js"></script>
+  <script>
+    const f = document.getElementById("reqForm");
+    f.required_date.min = new Date().toISOString().slice(0, 10);
+    f.addEventListener("submit", async e => {
+      e.preventDefault();
+      if (!validateForm(f)) return toast("Please fix the highlighted fields.", "error");
+      const btn = document.getElementById("btn"); btn.disabled = true;
+      try {
+        const r = await api("/requests", { method: "POST", body: JSON.stringify(formData(f)) });
+        toast(r.message, "success");
+        const contact = f.contact.value; f.reset();
+        setTimeout(() => location.href = `dashboard.html?contact=${contact}`, 1500);
+      } catch (err) { toast(err.message, "error"); }
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>

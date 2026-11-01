@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard – LifeLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-head"><h1>📊 Dashboard</h1><p>Live numbers from the LifeLink database.</p></div>
+  <section style="padding-top:20px">
+    <div class="container">
+      <div class="grid grid-4">
+        <div class="card stat"><div class="num" data-k="total_donors">0</div><div class="lbl">Total Donors</div></div>
+        <div class="card stat"><div class="num" data-k="total_requests">0</div><div class="lbl">Total Requests</div></div>
+        <div class="card stat"><div class="num" data-k="pending_requests">0</div><div class="lbl">Pending</div></div>
+        <div class="card stat"><div class="num" data-k="fulfilled_requests">0</div><div class="lbl">Fulfilled</div></div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1fr 2fr;margin-top:24px" id="split">
+        <div class="card"><h3 style="margin-bottom:14px">Donors by Blood Group</h3><div class="bars" id="bars"></div></div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+            <h3>All Blood Requests</h3>
+            <select id="statusFilter" style="padding:8px 12px"><option value="">All</option><option>Pending</option><option>Fulfilled</option></select>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Patient</th><th>Group</th><th>Hospital</th><th>City</th><th>Units</th><th>Level</th><th>Date</th><th>Status</th></tr></thead><tbody id="allReq"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:30px">
+        <h3>My Submitted Requests</h3>
+        <p class="muted">Enter the contact number you used when submitting. You can mark requests fulfilled or delete them.</p>
+        <form id="mineForm" class="search-bar" style="grid-template-columns:1fr auto;margin-top:14px" novalidate>
+          <div class="field"><input name="contact" maxlength="10" data-rule="phone" placeholder="10-digit contact number"><span class="err"></span></div>
+          <button class="btn btn-primary" style="align-self:start">View My Requests</button>
+        </form>
+        <div class="table-wrap" style="margin-top:16px;display:none" id="mineWrap"><table><thead><tr><th>Patient</th><th>Group</th><th>Hospital</th><th>Units</th><th>Level</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="mine"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+  <style>@media(max-width:900px){#split{grid-template-columns:1fr!important}}</style>
+
+  <script src="js/app.js"></script>
+  <script>
+    let myContact = "";
+    async function loadStats() {
+      const s = await api("/stats");
+      document.querySelectorAll("[data-k]").forEach(el => animateCount(el, s[el.dataset.k] || 0));
+      const max = Math.max(1, ...s.by_group.map(g => g.count));
+      document.getElementById("bars").innerHTML = s.by_group.map(g =>
+        `<div class="bar-row"><span>${esc(g.group)}</span><div class="bar"><i style="width:${g.count / max * 100}%"></i></div><span>${g.count}</span></div>`).join("") || `<p class="muted">No donors yet.</p>`;
+    }
+    async function loadAll() {
+      const st = document.getElementById("statusFilter").value;
+      const { requests } = await api(`/requests${st ? "?status=" + st : ""}`);
+      document.getElementById("allReq").innerHTML = requests.map(r => `<tr>
+        <td>${esc(r.patient_name)}</td><td><b>${esc(r.blood_group)}</b></td><td>${esc(r.hospital)}</td><td>${esc(r.city)}</td>
+        <td>${r.units}</td><td><span class="pill ${esc(r.emergency_level)}">${esc(r.emergency_level)}</span></td>
+        <td>${esc(r.required_date)}</td><td><span class="pill ${esc(r.status)}">${esc(r.status)}</span></td></tr>`).join("")
+        || `<tr><td colspan="8" class="empty">No requests.</td></tr>`;
+    }
+    async function loadMine() {
+      const { requests } = await api(`/requests?contact=${myContact}`);
+      document.getElementById("mineWrap").style.display = "block";
+      document.getElementById("mine").innerHTML = requests.map(r => `<tr>
+        <td>${esc(r.patient_name)}</td><td><b>${esc(r.blood_group)}</b></td><td>${esc(r.hospital)}</td><td>${r.units}</td>
+        <td><span class="pill ${esc(r.emergency_level)}">${esc(r.emergency_level)}</span></td><td>${esc(r.required_date)}</td>
+        <td><span class="pill ${esc(r.status)}">${esc(r.status)}</span></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick="setStatus(${r.id}, '${r.status === "Pending" ? "Fulfilled" : "Pending"}')">${r.status === "Pending" ? "✔ Mark fulfilled" : "↺ Reopen"}</button>
+          <button class="btn btn-outline btn-sm" onclick="removeReq(${r.id})">🗑</button></td></tr>`).join("")
+        || `<tr><td colspan="8" class="empty">No requests found for this number.</td></tr>`;
+    }
+    async function refresh() { await Promise.all([loadStats(), loadAll(), myContact && loadMine()]); }
+    async function setStatus(id, status) {
+      try { const r = await api(`/requests/${id}`, { method: "PUT", body: JSON.stringify({ contact: myContact, status }) }); toast(r.message, "success"); refresh(); }
+      catch (e) { toast(e.message, "error"); }
+    }
+    async function removeReq(id) {
+      if (!confirm("Delete this request?")) return;
+      try { const r = await api(`/requests/${id}?contact=${myContact}`, { method: "DELETE" }); toast(r.message, "success"); refresh(); }
+      catch (e) { toast(e.message, "error"); }
+    }
+    document.getElementById("statusFilter").onchange = () => loadAll().catch(e => toast(e.message, "error"));
+    document.getElementById("mineForm").addEventListener("submit", e => {
+      e.preventDefault();
+      if (!validateForm(e.target)) return;
+      myContact = e.target.contact.value.trim();
+      loadMine().catch(err => toast(err.message, "error"));
+    });
+    const q = new URLSearchParams(location.search).get("contact");
+    if (q) { document.querySelector("#mineForm [name=contact]").value = q; myContact = q; }
+    refresh().catch(e => toast(e.message, "error"));
+  </script>
+</body>
+</html>
