@@ -26,13 +26,23 @@ std::string getFrontendDir() {
 }
 
 std::string getDatabasePath() {
+    const char* envDb = std::getenv("DATABASE_PATH");
+    if (envDb && std::string(envDb).length() > 0) {
+        fs::path p(envDb);
+        if (p.has_parent_path()) {
+            std::error_code ec;
+            fs::create_directories(p.parent_path(), ec);
+        }
+        return envDb;
+    }
     if (fs::exists("database")) {
         return "database/lifelink.db";
     }
     if (fs::exists("../database")) {
         return "../database/lifelink.db";
     }
-    fs::create_directories("database");
+    std::error_code ec;
+    fs::create_directories("database", ec);
     return "database/lifelink.db";
 }
 
@@ -114,6 +124,21 @@ int main(int argc, char* argv[]) {
         res.add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
         return res;
+    });
+
+    // ----------------------------------------------------------------------
+    // Health Check & Utilities for Cloud Hosting (Render, Railway, etc.)
+    // ----------------------------------------------------------------------
+    CROW_ROUTE(app, "/healthz")([]() {
+        crow::json::wvalue res;
+        res["status"] = "healthy";
+        res["service"] = "LifeLink Blood Donor Finder";
+        res["version"] = "1.0.0";
+        return jsonResponse(200, res);
+    });
+
+    CROW_ROUTE(app, "/favicon.ico")([frontendPath]() {
+        return serveFile(frontendPath + "/images/logo.svg");
     });
 
     // ----------------------------------------------------------------------
@@ -629,9 +654,10 @@ int main(int argc, char* argv[]) {
         return jsonResponse(200, res);
     });
 
-    std::cout << "[INFO] Starting LifeLink server on http://localhost:" << port << std::endl;
+    std::cout << "[INFO] Starting LifeLink server on http://0.0.0.0:" << port << std::endl;
+    std::cout << "[INFO] Listening on all network interfaces (0.0.0.0) with PORT=" << port << std::endl;
     std::cout << "[INFO] Press Ctrl+C in terminal to stop server." << std::endl;
 
-    app.port(port).multithreaded().run();
+    app.bindaddr("0.0.0.0").port(port).multithreaded().run();
     return 0;
 }

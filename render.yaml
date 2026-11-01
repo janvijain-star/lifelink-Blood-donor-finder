@@ -1,0 +1,18 @@
+# ==============================================================================
+# LifeLink - Blood Donor Finder (Render Blueprint Configuration)
+# Docs: https://render.com/docs/blueprint-spec
+# ==============================================================================
+
+services:
+  - type: web
+    name: lifelink-blood-finder
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 8080
