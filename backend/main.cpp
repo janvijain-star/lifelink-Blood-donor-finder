@@ -1,5 +1,8 @@
 // LifeLink - Blood Donor Finder : C++ REST backend (Crow + SQLite)
 #include "crow_all.h"
+#ifdef DELETE
+#undef DELETE
+#endif
 #include <sqlite3.h>
 #include <fstream>
 #include <sstream>
