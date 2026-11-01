@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find a Donor – LifeLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-head"><h1>🔍 Find a Donor</h1><p>Search by blood group and city.</p></div>
+  <section style="padding-top:20px">
+    <div class="container">
+      <form class="form-card search-bar" id="searchForm" style="max-width:none">
+        <div class="field"><label>Blood Group</label><select name="blood_group" data-blood><option value="">All groups</option></select></div>
+        <div class="field"><label>City</label><input name="city" placeholder="e.g. Delhi"></div>
+        <label class="check" style="padding-bottom:12px"><input type="checkbox" name="available" checked> Available only</label>
+        <button class="btn btn-primary">Search</button>
+      </form>
+      <p class="muted" id="count" style="margin:26px 0 12px"></p>
+      <div class="grid grid-3" id="results"></div>
+    </div>
+  </section>
+
+  <div class="modal" id="contactModal"><form class="form-card" id="contactForm" novalidate>
+    <h3>View contact details</h3>
+    <p class="muted">To protect donor privacy, please tell us who you are. This access is logged.</p><br>
+    <div class="field"><label>Your Name</label><input name="requester_name" data-rule="name"><span class="err"></span></div>
+    <div class="field"><label>Your Mobile</label><input name="requester_phone" maxlength="10" data-rule="phone"><span class="err"></span></div>
+    <div class="form-actions"><button class="btn btn-primary">Show contact</button><button type="button" class="btn btn-outline" onclick="contactModal.classList.remove('open')">Cancel</button></div>
+  </form></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    const results = document.getElementById("results");
+    const contactModal = document.getElementById("contactModal");
+    let selected = null;
+
+    async function search() {
+      const f = document.getElementById("searchForm");
+      const p = new URLSearchParams();
+      if (f.blood_group.value) p.set("blood_group", f.blood_group.value);
+      if (f.city.value.trim()) p.set("city", f.city.value.trim());
+      if (f.available.checked) p.set("available", "1");
+      results.innerHTML = `<div class="empty">Searching…</div>`;
+      try {
+        const { donors, count } = await api(`/donors?${p}`);
+        document.getElementById("count").textContent = `${count} donor${count === 1 ? "" : "s"} found`;
+        results.innerHTML = donors.length ? donors.map(d => `
+          <div class="card donor" id="d${d.id}">
+            <div class="donor-top"><div><h3>${esc(d.full_name)}</h3><span class="muted">${esc(d.gender)}, ${d.age} yrs</span></div>
+              <div class="blood-badge">${esc(d.blood_group)}</div></div>
+            <div>📍 ${esc(d.city)}, ${esc(d.state)}</div>
+            <div class="contact">📞 ${esc(d.mobile_masked)}<br>✉ ${esc(d.email_masked)}</div>
+            <div><span class="pill ${d.available ? "ok" : "no"}">${d.available ? "Available" : "Not available"}</span></div>
+            ${d.consent_share_contact
+              ? `<button class="btn btn-outline btn-sm" onclick="openContact(${d.id})">View contact</button>`
+              : `<span class="muted">🔒 Donor has not consented to share contact details.</span>`}
+          </div>`).join("") : `<div class="empty" style="grid-column:1/-1">No donors match. Try another city, or <a href="request.html" style="color:var(--red)">post an emergency request</a>.</div>`;
+      } catch (e) { results.innerHTML = ""; toast(e.message, "error"); }
+    }
+    function openContact(id) { selected = id; contactModal.classList.add("open"); }
+
+    document.getElementById("searchForm").addEventListener("submit", e => { e.preventDefault(); search(); });
+    document.getElementById("contactForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (!validateForm(e.target)) return;
+      try {
+        const c = await api(`/donors/${selected}/contact`, { method: "POST", body: JSON.stringify(formData(e.target)) });
+        document.querySelector(`#d${selected} .contact`).innerHTML =
+          `📞 <a href="tel:${esc(c.mobile)}" style="color:var(--red);font-weight:600">${esc(c.mobile)}</a><br>✉ <a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`;
+        contactModal.classList.remove("open");
+        toast("Contact details revealed.", "success");
+      } catch (err) { toast(err.message, "error"); }
+    });
+    search();
+  </script>
+</body>
+</html>
